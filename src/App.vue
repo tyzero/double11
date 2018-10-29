@@ -12,20 +12,20 @@ export default {
   name: 'app',
   components: {},
 
-  data () {
+  data() {
     return {
       USER_AGENT: navigator.userAgent.toLowerCase()
     }
   },
 
-  mounted () {
+  mounted() {
     if (this.isWechat) {
       this.$router.push('/wechat')
     }
   },
 
   computed: {
-    isWechat () {
+    isWechat() {
       const isWechat = /MicroMessenger/i
       return isWechat.test(this.USER_AGENT)
     }
@@ -35,6 +35,10 @@ export default {
 </script>
 
 <style lang="less">
+  html, body {
+    height: 100%
+  }
+
   body {
     font-size: 16px;
     background-color: #f8f8f8;
@@ -45,8 +49,9 @@ export default {
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-align: center;
     color: #2c3e50;
+    height: 100%
+
   }
 
   #nav {
