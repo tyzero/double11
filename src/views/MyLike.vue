@@ -20,8 +20,9 @@
           <Row gutter="20" type="flex" v-if="friends.length>3">
             <van-col v-for="(item,index) in friends" :key='index' v-if="index>2 &&index<6" span="8">
               <ItemFriend>
-                {{item.name}}
-                {{item.link}}
+                <a :href="'taobao://'+item.link">
+                  {{item.name}}
+                </a>
               </ItemFriend>
             </van-col>
           </Row>
