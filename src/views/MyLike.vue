@@ -1,5 +1,6 @@
 <template>
   <div>
+
     <PullRefresh v-model="isLoading" @refresh="onRefresh">
       <div class="my-like">
         <Cell class="desc" title="互赞的朋友" label="根据双十一的规定，你每天最多能给6个战队点赞，所以你能添加6个好友" status="">
@@ -7,30 +8,65 @@
 
         <div class="item">
           <h2>互赞列表</h2>
-          <Row gutter="20" type="flex" justify="space-between">
-            <van-col v-for="(item,index) in count" :key='index' v-if="index<3" span="8">
+          <Row gutter="20" type="flex">
+            <van-col v-for="(item,index) in friends" :key='index' v-if="index<3" span="8">
               <ItemFriend>
-                {{index}}
+                <a :href="'taobao://'+item.link">
+                  {{item.name}}
+                </a>
+              </ItemFriend>
+            </van-col>
+          </Row>
+          <Row gutter="20" type="flex" v-if="friends.length>3">
+            <van-col v-for="(item,index) in friends" :key='index' v-if="index>2 &&index<6" span="8">
+              <ItemFriend>
+                {{item.name}}
+                {{item.link}}
               </ItemFriend>
             </van-col>
           </Row>
 
         </div>
 
-        <p>jjj: {{ count }}</p>
+        <p>已添加: {{ friends.length}}</p>
 
       </div>
     </PullRefresh>
     <div class="footer">
+
       <Button @click="addFriend" size="normal" square type="default">添加好友口令</Button>
+      <van-dialog
+          v-model="showss"
+          show-cancel-button
+          :before-close="beforeClose"
+      >
+        <Field
+            v-model="message"
+            type="textarea"
+            placeholder="请黏贴输入好友的淘口令"
+            rows="4"
+            autosize
+        />
+        <Field
+            v-model="nickName"
+            placeholder="起个别名（可选）"
+            rows="1"
+        />
+
+      </van-dialog>
+
     </div>
+
   </div>
 
 </template>
 
 <script>
-import { Panel, Button, PullRefresh, Cell, CellGroup, Row, Col } from 'vant'
+import { Panel, Button, PullRefresh, Cell, CellGroup, Row, Col, Dialog, Field } from 'vant'
 import ItemFriend from '../components/ItemFriend'
+import Vue from 'vue'
+
+Vue.use(Dialog)
 
 export default {
   components: {
@@ -41,13 +77,24 @@ export default {
     CellGroup,
     ItemFriend,
     Row,
-    [Col.name]: Col
+    [Col.name]: Col,
+    [Dialog.name]: Dialog,
+    Field
   },
 
-  data() {
+  data () {
     return {
       isLoading: true,
-      count: 0
+      friends: [],
+      showss: false,
+      message: '',
+      nickName: ''
+    }
+  },
+
+  computed: {
+    kouLinReg () {
+      return /[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/g
     }
   },
 
@@ -57,7 +104,7 @@ export default {
     }
   },
   methods: {
-    onRefresh() {
+    onRefresh () {
       setTimeout(() => {
         this.$toast('刷新成功')
         this.isLoading = false
@@ -68,8 +115,31 @@ export default {
       }, 500)
     },
 
-    addFriend() {
-      this.count++
+    addFriend () {
+      this.showss = !this.showss
+    },
+
+
+    getUserLink () {
+      const result = this.kouLinReg.exec(this.message)
+      if (result) {
+        return result[0]
+      }else {
+        return null
+      }
+    },
+
+    beforeClose (action, done) {
+      if (action === 'confirm') {
+        // setTimeout(done, 1000)
+
+        this.friends.push({ name: this.nickName ? this.nickName : 'Hero', link: this.getUserLink() })
+        this.message = ''
+        this.nickName = null
+        done()
+      } else {
+        done()
+      }
     }
   }
 }
@@ -85,30 +155,6 @@ export default {
 
   .desc {
     width: 100%;
-  }
-
-  .item {
-    padding: 10px;
-    ::before {
-      content: '';
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 2px;
-      position: absolute;
-      background: repeating-linear-gradient(
-          -45deg,
-          #ff6c6c 0,
-          #ff6c6c 20%,
-          transparent 0,
-          transparent 25%,
-          #3283fa 0,
-          #3283fa 45%,
-          transparent 0,
-          transparent 50%
-      );
-      background-size: 80px;
-    }
   }
 
   .footer {

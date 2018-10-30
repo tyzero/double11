@@ -8,5 +8,23 @@
     <br/>
     <br/>
     <img src="../assets/wechat_tips.png">
+
   </div>
 </template>
+
+<script>
+
+
+export default {
+  components: {}
+}
+
+</script>
+
+<style scoped lang="less">
+  .wechat{
+    text-align: center;
+
+  }
+
+</style>

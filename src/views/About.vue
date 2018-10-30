@@ -8,7 +8,7 @@
 export default {
   metaInfo: function () {
     return {
-      title: '关于作者',
+      title: '关于',
       meta: [
         { // set meta
           name: 'keyWords',
