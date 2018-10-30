@@ -1,6 +1,5 @@
 <template>
   <div>
-
     <PullRefresh v-model="isLoading" @refresh="onRefresh">
       <div class="my-like">
         <Cell class="desc" title="互赞的朋友" label="根据双十一的规定，你每天最多能给6个战队点赞，所以你能添加6个好友" status="">
@@ -57,9 +56,7 @@
       </van-dialog>
 
     </div>
-
   </div>
-
 </template>
 
 <script>
@@ -83,7 +80,7 @@ export default {
     Field
   },
 
-  data () {
+  data() {
     return {
       isLoading: true,
       friends: [],
@@ -94,8 +91,8 @@ export default {
   },
 
   computed: {
-    kouLinReg () {
-      return /[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?/g
+    taobaoCommandReg() {
+      return /[\w\-_]+(\.[\w\-_]+)+([\w\-.,@?^=%&:/~+#]*[\w\-@?^=%&/~+#])?/
     }
   },
 
@@ -105,7 +102,7 @@ export default {
     }
   },
   methods: {
-    onRefresh () {
+    onRefresh() {
       setTimeout(() => {
         this.$toast('刷新成功')
         this.isLoading = false
@@ -116,27 +113,35 @@ export default {
       }, 500)
     },
 
-    addFriend () {
+    addFriend(e) {
+      console.log(e)
       this.showss = !this.showss
     },
 
-
-    getUserLink () {
-      const result = this.kouLinReg.exec(this.message)
+    getUserLink() {
+      const result = this.taobaoCommandReg.exec(this.message)
+      console.log(result)
       if (result) {
         return result[0]
-      }else {
+      } else {
         return null
       }
     },
 
-    beforeClose (action, done) {
+    checkTaobaoCommand() {
+      if (this.taobaoCommandReg.test(this.message)) {
+        this.friends.push({ name: this.nickName ? this.nickName : 'Hero', link: this.getUserLink() })
+      } else {
+        this.$dialog.alert({ title: '警告', message: '解析口令失败QAQ' })
+      }
+      this.message = ''
+      this.nickName = null
+    },
+
+    beforeClose(action, done) {
       if (action === 'confirm') {
         // setTimeout(done, 1000)
-
-        this.friends.push({ name: this.nickName ? this.nickName : 'Hero', link: this.getUserLink() })
-        this.message = ''
-        this.nickName = null
+        this.checkTaobaoCommand()
         done()
       } else {
         done()

@@ -6,6 +6,7 @@ import MyLike from './views/MyLike'
 import MakeFriend from './views/MakeFriend'
 import About from './views/About'
 import Meta from 'vue-meta'
+import Login from './views/Login'
 
 Vue.use(Router)
 Vue.use(Meta)
@@ -36,6 +37,11 @@ export default new Router({
         }
 
       ]
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: Login
     },
     {
       path: '/wechat',
