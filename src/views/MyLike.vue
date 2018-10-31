@@ -8,7 +8,7 @@
         <div class="item">
           <h2>互赞列表</h2>
           <Row gutter="20" type="flex">
-            <van-col v-for="(item,index) in friends" :key='index' v-if="index<3" span="8">
+            <van-col v-for="(item,index) in myFriends" :key='index' v-if="index<3" span="8">
               <ItemFriend>
                 <a :href="'taobao://'+item.link">
                   {{item.name}}
@@ -16,8 +16,8 @@
               </ItemFriend>
             </van-col>
           </Row>
-          <Row gutter="20" type="flex" v-if="friends.length>3">
-            <van-col v-for="(item,index) in friends" :key='index' v-if="index>2 &&index<6" span="8">
+          <Row gutter="20" type="flex" v-if="myFriends.length>3">
+            <van-col v-for="(item,index) in myFriends" :key='index' v-if="index>2 &&index<6" span="8">
               <ItemFriend>
                 <a :href="'taobao://'+item.link">
                   {{item.name}}
@@ -28,7 +28,8 @@
 
         </div>
 
-        <p>已添加: {{ friends.length}}</p>
+        <p>已添加: {{ myFriends.length}}</p>
+        <p>点击名字，自动跳转淘宝，不支持微信内置浏览器</p>
 
       </div>
     </PullRefresh>
@@ -63,6 +64,8 @@
 import { Panel, Button, PullRefresh, Cell, CellGroup, Row, Col, Dialog, Field } from 'vant'
 import ItemFriend from '../components/ItemFriend'
 import Vue from 'vue'
+import { mapGetters } from 'vuex'
+import { ACTION_ADD_FRIEND, ACTION_LOGIN } from '../store/actions.type';
 
 Vue.use(Dialog)
 
@@ -80,10 +83,9 @@ export default {
     Field
   },
 
-  data() {
+  data () {
     return {
       isLoading: true,
-      friends: [],
       showss: false,
       message: '',
       nickName: ''
@@ -91,9 +93,13 @@ export default {
   },
 
   computed: {
-    taobaoCommandReg() {
+    taobaoCommandReg () {
       return /[\w\-_]+(\.[\w\-_]+)+([\w\-.,@?^=%&:/~+#]*[\w\-@?^=%&/~+#])?/
-    }
+    },
+    ...mapGetters([
+      'isAuthenticated',
+      'myFriends'
+    ])
   },
 
   metaInfo: function () {
@@ -101,26 +107,38 @@ export default {
       title: '我的'
     }
   },
+
+  mounted(){
+    this.$store.dispatch(ACTION_LOGIN).then()
+  },
+
   methods: {
-    onRefresh() {
-      setTimeout(() => {
+    onRefresh () {
+      this.$store.dispatch(ACTION_LOGIN).then(()=>{
         this.$toast('刷新成功')
         this.isLoading = false
         this.count--
         if (this.count < 0) {
           this.count = 0
         }
-      }, 500)
+      })
     },
 
-    addFriend(e) {
-      console.log(e)
-      this.showss = !this.showss
+    addFriend () {
+      if (this.myFriends.length>=6){
+        this.$toast('只能跟6个好友互赞')
+        return
+      }
+      console.log(this.isAuthenticated)
+      if (this.isAuthenticated) {
+        this.showss = !this.showss
+      } else {
+        this.$router.push('/login')
+      }
     },
 
-    getUserLink() {
+    getUserLink () {
       const result = this.taobaoCommandReg.exec(this.message)
-      console.log(result)
       if (result) {
         return result[0]
       } else {
@@ -128,9 +146,13 @@ export default {
       }
     },
 
-    checkTaobaoCommand() {
+    checkTaobaoCommand () {
       if (this.taobaoCommandReg.test(this.message)) {
-        this.friends.push({ name: this.nickName ? this.nickName : 'Hero', link: this.getUserLink() })
+        const link = this.getUserLink();
+        const name = this.nickName ? this.nickName : 'Hero'
+        this.$store.dispatch(ACTION_ADD_FRIEND, { name, link }).then(() => {
+          // this.friends.push({ name, link })
+        })
       } else {
         this.$dialog.alert({ title: '警告', message: '解析口令失败QAQ' })
       }
@@ -138,7 +160,7 @@ export default {
       this.nickName = null
     },
 
-    beforeClose(action, done) {
+    beforeClose (action, done) {
       if (action === 'confirm') {
         // setTimeout(done, 1000)
         this.checkTaobaoCommand()

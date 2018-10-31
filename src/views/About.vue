@@ -1,6 +1,9 @@
 <template>
   <div class="about">
-    <h1>This is an about page</h1>
+    <h5>基于Vue + Vuex + Router + Vant 的简单实践</h5>
+    <p>
+      github: <a href="https://github.com/tyzero/double11">https://github.com/tyzero/double11</a>
+    </p>
   </div>
 </template>
 
@@ -26,3 +29,14 @@ export default {
   }
 }
 </script>
+
+<style scoped lang="less">
+  .about {
+    padding: 15px;
+    h5 {
+      text-align: center
+    }
+
+  }
+
+</style>
